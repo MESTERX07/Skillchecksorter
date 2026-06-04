@@ -542,12 +542,14 @@ public partial class MainWindow : Window
         UndoBtn.IsEnabled = _undo.Count > 0;
         UndoBtn.Content   = _undo.Count > 0 ? $"↩  Undo  {_undo.Count}" : "↩  Undo";
 
-        ProgressBar.Value = 1000;
-        RemLabel.Text    = "Left to sort: 0";
-        HitLabel.Text    = $"HIT: {hitN}";
-        MissLabel.Text   = $"MISS: {missN}";
-        UnsureLabel.Text = $"UNSURE: {_unsure}";
-        DelLabel.Text    = $"DEL: {_deleted}";
+        _deleted = 0;
+        _unsure  = 0;
+        ProgressBar.Value = 0;
+        RemLabel.Text    = "";
+        HitLabel.Text    = "HIT: 0";
+        MissLabel.Text   = "MISS: 0";
+        UnsureLabel.Text = "UNSURE: 0";
+        DelLabel.Text    = "DEL: 0";
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

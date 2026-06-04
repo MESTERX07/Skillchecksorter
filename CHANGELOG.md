@@ -3,7 +3,8 @@
 ## [v1.0.4] - 2026-06-04
 
 ### Fixed
-- **Trash cleaned on exit** — the `.trash` folder is now wiped automatically when the app window closes, keeping session folders tidy
+- **Trash folder removed on exit** — the entire `.trash` directory is now deleted (not just its contents) when the app window closes
+- **Counters reset on session complete** — HIT, MISS, UNSURE, DEL, and progress bar all reset to zero when you finish sorting a folder, ready for the next session
 - **Stats refresh consolidation** — counters now update from a single point inside `ShowCurrent()`, eliminating potential double-refresh on certain action paths
 
 ---
