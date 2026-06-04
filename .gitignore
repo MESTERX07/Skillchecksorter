@@ -17,3 +17,6 @@ settings.json
 *.tmp
 *.bak
 .trash/
+
+## Claude Code
+.claude/
