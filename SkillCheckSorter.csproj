@@ -8,10 +8,10 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <AssemblyName>SkillCheckSorter</AssemblyName>
     <RootNamespace>SkillCheckSorter</RootNamespace>
-    <ApplicationVersion>1.0.2</ApplicationVersion>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>1.0.2</FileVersion>
-    <Version>1.0.2</Version>
+    <ApplicationVersion>1.0.3</ApplicationVersion>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>1.0.3</FileVersion>
+    <Version>1.0.3</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <Optimize>true</Optimize>
     <UseWindowsForms>true</UseWindowsForms>
