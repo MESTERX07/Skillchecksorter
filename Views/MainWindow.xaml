@@ -454,28 +454,28 @@
             <Grid Margin="14,0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock x:Name="RemLabel"
-                               FontSize="12" Foreground="#A0A0A0" Text="Left to sort:"/>
-                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                               FontSize="11" Foreground="#606060" Text="Left to sort:"/>
+                    <TextBlock Margin="10,0" FontSize="10" Foreground="#282828" Text="·"/>
                     <TextBlock x:Name="HitLabel"
-                               FontSize="12" FontWeight="Bold" Foreground="#5ABF5A" Text="HIT:"/>
-                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                               FontSize="11" FontWeight="Bold" Foreground="#4DAD4D" Text="HIT:"/>
+                    <TextBlock Margin="10,0" FontSize="10" Foreground="#282828" Text="·"/>
                     <TextBlock x:Name="MissLabel"
-                               FontSize="12" FontWeight="Bold" Foreground="#E05555" Text="MISS:"/>
-                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                               FontSize="11" FontWeight="Bold" Foreground="#CC4444" Text="MISS:"/>
+                    <TextBlock Margin="10,0" FontSize="10" Foreground="#282828" Text="·"/>
                     <TextBlock x:Name="UnsureLabel"
-                               FontSize="12" FontWeight="Bold" Foreground="#B8960C" Text="UNSURE:"/>
-                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                               FontSize="11" FontWeight="Bold" Foreground="#A07C00" Text="UNSURE:"/>
+                    <TextBlock Margin="10,0" FontSize="10" Foreground="#282828" Text="·"/>
                     <TextBlock x:Name="DelLabel"
-                               FontSize="12" FontWeight="Bold" Foreground="#888888" Text="DEL:"/>
+                               FontSize="11" FontWeight="Bold" Foreground="#666666" Text="DEL:"/>
                 </StackPanel>
                 <ProgressBar x:Name="ProgressBar" Style="{StaticResource MonoBar}"
-                             HorizontalAlignment="Right" Width="220"
+                             HorizontalAlignment="Right" Width="200"
                              VerticalAlignment="Center"/>
             </Grid>
         </Border>
 
         <!-- ══ Action bar (bottom) ════════════════════════════════════════════ -->
-        <Border DockPanel.Dock="Bottom" Height="66"
+        <Border DockPanel.Dock="Bottom" Height="68"
                 Background="#0A0A0A"
                 BorderBrush="#181818" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal"
@@ -483,28 +483,38 @@
 
                 <Button x:Name="HitBtn"    Style="{StaticResource HitBtn}"    Click="HitBtn_Click"
                         Content="✓  HIT"/>
-                <TextBlock Text="H/→" Foreground="#606060" FontSize="10"
-                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+                <Border Background="#0D0D0D" BorderBrush="#1E1E1E" BorderThickness="1"
+                        CornerRadius="3" Padding="6,2" Margin="5,0,14,0" VerticalAlignment="Center">
+                    <TextBlock Text="H / →" Foreground="#484848" FontSize="9"/>
+                </Border>
 
                 <Button x:Name="MissBtn"   Style="{StaticResource MissBtn}"   Click="MissBtn_Click"
                         Content="✗  MISS"/>
-                <TextBlock Text="M/←" Foreground="#606060" FontSize="10"
-                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+                <Border Background="#0D0D0D" BorderBrush="#1E1E1E" BorderThickness="1"
+                        CornerRadius="3" Padding="6,2" Margin="5,0,14,0" VerticalAlignment="Center">
+                    <TextBlock Text="M / ←" Foreground="#484848" FontSize="9"/>
+                </Border>
 
                 <Button x:Name="UnsureBtn" Style="{StaticResource UnsureBtn}" Click="UnsureBtn_Click"
                         Content="?  Unsure"/>
-                <TextBlock Text="U"   Foreground="#606060" FontSize="10"
-                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+                <Border Background="#0D0D0D" BorderBrush="#1E1E1E" BorderThickness="1"
+                        CornerRadius="3" Padding="6,2" Margin="5,0,14,0" VerticalAlignment="Center">
+                    <TextBlock Text="U" Foreground="#484848" FontSize="9"/>
+                </Border>
 
                 <Button x:Name="UndoBtn"   Style="{StaticResource UndoBtn}"   Click="UndoBtn_Click"
                         Content="↩  Undo"/>
-                <TextBlock Text="Ctrl+Z" Foreground="#606060" FontSize="10"
-                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+                <Border Background="#0D0D0D" BorderBrush="#1E1E1E" BorderThickness="1"
+                        CornerRadius="3" Padding="6,2" Margin="5,0,14,0" VerticalAlignment="Center">
+                    <TextBlock Text="Ctrl+Z" Foreground="#484848" FontSize="9"/>
+                </Border>
 
                 <Button x:Name="DelBtn"    Style="{StaticResource DelBtn}"    Click="DelBtn_Click"
                         Content="⌫  Delete"/>
-                <TextBlock Text="Del" Foreground="#606060" FontSize="10"
-                           VerticalAlignment="Center" Margin="4,0,0,0"/>
+                <Border Background="#0D0D0D" BorderBrush="#1E1E1E" BorderThickness="1"
+                        CornerRadius="3" Padding="6,2" Margin="5,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Del" Foreground="#484848" FontSize="9"/>
+                </Border>
 
             </StackPanel>
         </Border>

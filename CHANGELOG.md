@@ -2,8 +2,19 @@
 
 ## [v1.0.5] - 2026-06-04
 
+### Added
+- **Folder marked on completion** — when all images are sorted the session folder is automatically renamed with a ` !` suffix (e.g. `1234 !`) so it is easy to identify in Explorer
+- **In-app uninstall** — Settings dialog now has an Uninstall button that launches the uninstaller and removes the app, settings, shortcuts and registry entries without touching any sorted image folders
+
 ### Fixed
-- **Session-relative HIT/MISS counters** — counters now start at 0 for every new session even if the destination folders already contain images from previous runs
+- **Session-relative HIT/MISS counters** — counters now start at 0 for every new session even if the destination folders already contain images from a previous run
+- **Counter undo accuracy** — `UndoEntry` now carries explicit `IsHit`/`IsMiss`/`IsUnsure` flags; removed fragile path-parsing that could silently leave MISS inflated after an undo
+- **Undo-after-done** — counters are no longer zeroed on the done screen so undoing a sort after completion keeps all stats accurate
+
+### Improved
+- **Settings dialog** — redesigned with card-style folder rows, colour-coded HIT (green) and MISS (red) row tints, pill badges, and a dedicated uninstall section
+- **Action bar** — keyboard shortcut hints now render as keycap badges instead of plain text
+- **Stats bar** — separator dots replace pipe characters for a cleaner look
 
 ---
 

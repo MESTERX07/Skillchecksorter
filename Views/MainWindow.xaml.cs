@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 
 namespace SkillCheckSorter;
 
-record UndoEntry(int ImageIndex, string OriginalPath, string DestPath, int OriginalFolder, bool IsDelete = false, bool IsUnsure = false);
+record UndoEntry(int ImageIndex, string OriginalPath, string DestPath, int OriginalFolder, bool IsDelete = false, bool IsHit = false, bool IsMiss = false, bool IsUnsure = false);
 public partial class MainWindow : Window
 {
     // ── Paths ────────────────────────────────────────────────────────────────
@@ -30,10 +30,10 @@ public partial class MainWindow : Window
     readonly Dictionary<string, BitmapImage> _cache = new();
     readonly Queue<string> _cacheOrder = new();     // tracks insertion order for eviction
     bool _suppressCombos;
-    int _deleted;
+    int _hit;
+    int _miss;
     int _unsure;
-    int _hitBaseline;
-    int _missBaseline;
+    int _deleted;
 
     // Hover colours: normalBg, hoverBg, normalBorder, hoverBorder
     record HoverState(Brush NBg, Brush HBg, Brush NBrd, Brush HBrd);
@@ -264,10 +264,10 @@ public partial class MainWindow : Window
         _undo.Clear();
         _cache.Clear();
         _cacheOrder.Clear();
-        _deleted      = 0;
-        _unsure       = 0;
-        _hitBaseline  = _settings is { } s0 ? CountFolder(s0.HitFolder)  : 0;
-        _missBaseline = _settings is { } s1 ? CountFolder(s1.MissFolder) : 0;
+        _hit     = 0;
+        _miss    = 0;
+        _unsure  = 0;
+        _deleted = 0;
 
         var sub = new DirectoryInfo(
             Path.Combine(dir.FullName, _settings.SourceFolder.ToString()));
@@ -405,8 +405,12 @@ public partial class MainWindow : Window
             return;
         }
 
+        bool isHit  = !isUnsure && target == _settings.HitFolder;
+        bool isMiss = !isUnsure && target == _settings.MissFolder;
         if (isUnsure) _unsure++;
-        _undo.Push(new UndoEntry(_idx, file.FullName, dest, folder, IsUnsure: isUnsure));
+        else if (isHit)  _hit++;
+        else if (isMiss) _miss++;
+        _undo.Push(new UndoEntry(_idx, file.FullName, dest, folder, IsHit: isHit, IsMiss: isMiss, IsUnsure: isUnsure));
         _cache.Remove(file.FullName);
         _images[_idx] = (new FileInfo(dest), target);
 
@@ -450,6 +454,8 @@ public partial class MainWindow : Window
             _images[entry.ImageIndex] = (new FileInfo(restore), entry.OriginalFolder);
             _idx = entry.ImageIndex;
             if (entry.IsUnsure) _unsure--;
+            else if (entry.IsHit)  _hit--;
+            else if (entry.IsMiss) _miss--;
         }
 
         SetActionsEnabled(true);
@@ -494,25 +500,13 @@ public partial class MainWindow : Window
 
     // ── Stats ─────────────────────────────────────────────────────────────────
 
-    int CountFolder(int n)
-    {
-        if (_sessionDir is null) return 0;
-        var d = new DirectoryInfo(Path.Combine(_sessionDir.FullName, n.ToString()));
-        return d.Exists
-            ? d.EnumerateFiles().Count(f => ImageExts.Contains(f.Extension.ToLowerInvariant()))
-            : 0;
-    }
-
     void RefreshStats()
     {
-        if (_settings is null) return;
         int remaining = Math.Max(0, _images.Count - _idx);
-        int hitN      = CountFolder(_settings.HitFolder)  - _hitBaseline;
-        int missN     = CountFolder(_settings.MissFolder) - _missBaseline;
 
         RemLabel.Text    = $"Left to sort: {remaining}";
-        HitLabel.Text    = $"HIT: {hitN}";
-        MissLabel.Text   = $"MISS: {missN}";
+        HitLabel.Text    = $"HIT: {_hit}";
+        MissLabel.Text   = $"MISS: {_miss}";
         UnsureLabel.Text = $"UNSURE: {_unsure}";
         DelLabel.Text    = $"DEL: {_deleted}";
 
@@ -526,16 +520,12 @@ public partial class MainWindow : Window
 
     void ShowDone()
     {
-        if (_settings is null) return;
-
         CleanTrash();
         PurgeDeleteUndos();
-
-        int hitN  = CountFolder(_settings.HitFolder)  - _hitBaseline;
-        int missN = CountFolder(_settings.MissFolder) - _missBaseline;
+        MarkSessionDone();
 
         SetImage(null);
-        PlaceholderText.Text = $"Session complete\n\nHIT: {hitN}     MISS: {missN}     UNSURE: {_unsure}     DEL: {_deleted}";
+        PlaceholderText.Text = $"Session complete\n\nHIT: {_hit}     MISS: {_miss}     UNSURE: {_unsure}     DEL: {_deleted}";
         PlaceholderText.Foreground = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55));
 
         ClearInfoBar("Session complete");
@@ -546,8 +536,7 @@ public partial class MainWindow : Window
         UndoBtn.IsEnabled = _undo.Count > 0;
         UndoBtn.Content   = _undo.Count > 0 ? $"↩  Undo  {_undo.Count}" : "↩  Undo";
 
-        _deleted = 0;
-        _unsure  = 0;
+        // Reset display — fields stay intact so undo still works correctly
         ProgressBar.Value = 0;
         RemLabel.Text    = "";
         HitLabel.Text    = "HIT: 0";
@@ -557,6 +546,25 @@ public partial class MainWindow : Window
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    void MarkSessionDone()
+    {
+        if (_sessionDir?.Parent is null) return;
+        if (_sessionDir.Name.EndsWith(" !")) return;
+
+        string newPath = Path.Combine(_sessionDir.Parent.FullName, _sessionDir.Name + " !");
+        if (Directory.Exists(newPath)) return;
+
+        try { Directory.Move(_sessionDir.FullName, newPath); }
+        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"MarkSessionDone: {ex.Message}"); return; }
+
+        _sessionDir = new DirectoryInfo(newPath);
+        _undo.Clear();
+        _cache.Clear();
+
+        var disp = newPath.Length > 80 ? "…" + newPath[^77..] : newPath;
+        FolderLabel.Text = disp;
+    }
 
     void CleanTrash()
     {
