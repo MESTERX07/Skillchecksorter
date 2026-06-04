@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.0.5] - 2026-06-04
+
+### Fixed
+- **Session-relative HIT/MISS counters** — counters now start at 0 for every new session even if the destination folders already contain images from previous runs
+
+---
+
 ## [v1.0.4] - 2026-06-04
 
 ### Fixed

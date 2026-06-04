@@ -32,6 +32,8 @@ public partial class MainWindow : Window
     bool _suppressCombos;
     int _deleted;
     int _unsure;
+    int _hitBaseline;
+    int _missBaseline;
 
     // Hover colours: normalBg, hoverBg, normalBorder, hoverBorder
     record HoverState(Brush NBg, Brush HBg, Brush NBrd, Brush HBrd);
@@ -262,8 +264,10 @@ public partial class MainWindow : Window
         _undo.Clear();
         _cache.Clear();
         _cacheOrder.Clear();
-        _deleted = 0;
-        _unsure  = 0;
+        _deleted      = 0;
+        _unsure       = 0;
+        _hitBaseline  = _settings is { } s0 ? CountFolder(s0.HitFolder)  : 0;
+        _missBaseline = _settings is { } s1 ? CountFolder(s1.MissFolder) : 0;
 
         var sub = new DirectoryInfo(
             Path.Combine(dir.FullName, _settings.SourceFolder.ToString()));
@@ -503,8 +507,8 @@ public partial class MainWindow : Window
     {
         if (_settings is null) return;
         int remaining = Math.Max(0, _images.Count - _idx);
-        int hitN      = CountFolder(_settings.HitFolder);
-        int missN     = CountFolder(_settings.MissFolder);
+        int hitN      = CountFolder(_settings.HitFolder)  - _hitBaseline;
+        int missN     = CountFolder(_settings.MissFolder) - _missBaseline;
 
         RemLabel.Text    = $"Left to sort: {remaining}";
         HitLabel.Text    = $"HIT: {hitN}";
@@ -527,8 +531,8 @@ public partial class MainWindow : Window
         CleanTrash();
         PurgeDeleteUndos();
 
-        int hitN  = CountFolder(_settings.HitFolder);
-        int missN = CountFolder(_settings.MissFolder);
+        int hitN  = CountFolder(_settings.HitFolder)  - _hitBaseline;
+        int missN = CountFolder(_settings.MissFolder) - _missBaseline;
 
         SetImage(null);
         PlaceholderText.Text = $"Session complete\n\nHIT: {hitN}     MISS: {missN}     UNSURE: {_unsure}     DEL: {_deleted}";
