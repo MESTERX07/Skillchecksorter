@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 
 namespace SkillCheckSorter;
 
-record UndoEntry(int ImageIndex, string OriginalPath, string DestPath, int OriginalFolder, bool IsDelete = false);
+record UndoEntry(int ImageIndex, string OriginalPath, string DestPath, int OriginalFolder, bool IsDelete = false, bool IsUnsure = false);
 public partial class MainWindow : Window
 {
     // ── Paths ────────────────────────────────────────────────────────────────
@@ -165,6 +165,8 @@ public partial class MainWindow : Window
     }
 
     // ── Gear / caption handlers ───────────────────────────────────────────────
+
+    void IndexBtn_Click(object s, RoutedEventArgs e) => IndexPopup.IsOpen = !IndexPopup.IsOpen;
 
     void GearBtn_Click(object s, RoutedEventArgs e)
     {
@@ -372,9 +374,9 @@ public partial class MainWindow : Window
         MoveToFolder(target);
     }
 
-    void SortUnsure() { _unsure++; MoveToFolder(0); }
+    void SortUnsure() => MoveToFolder(0, isUnsure: true);
 
-    void MoveToFolder(int target)
+    void MoveToFolder(int target, bool isUnsure = false)
     {
         if (_settings is null || _images.Count == 0 || _idx >= _images.Count) return;
 
@@ -396,7 +398,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        _undo.Push(new UndoEntry(_idx, file.FullName, dest, folder));
+        if (isUnsure) _unsure++;
+        _undo.Push(new UndoEntry(_idx, file.FullName, dest, folder, IsUnsure: isUnsure));
         _cache.Remove(file.FullName);
         _images[_idx] = (new FileInfo(dest), target);
 
@@ -440,6 +443,7 @@ public partial class MainWindow : Window
         {
             _images[entry.ImageIndex] = (new FileInfo(restore), entry.OriginalFolder);
             _idx = entry.ImageIndex;
+            if (entry.IsUnsure) _unsure--;
         }
 
         SetActionsEnabled(true);
@@ -608,6 +612,7 @@ public partial class MainWindow : Window
             Hook(UndoBtn,   "#141414", "#1C1C1C", "#252525", "#404040");
             Hook(DelBtn,    "#0F0F0F", "#1A1010", "#1C1C1C", "#3A2020");
             Hook(OpenBtn,   "#141414", "#1E1E1E", "#2A2A2A", "#555555");
+            Hook(IndexBtn,  "Transparent", "#1A1A1A", "Transparent", "Transparent");
             Hook(GearBtn,   "Transparent", "#1A1A1A", "Transparent", "Transparent");
             Hook(MinBtn,    "Transparent", "#1A1A1A", "Transparent", "Transparent");
             Hook(MaxBtn,    "Transparent", "#1A1A1A", "Transparent", "Transparent");
