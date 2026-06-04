@@ -181,6 +181,7 @@ public partial class MainWindow : Window
 
     void MinBtn_Click(object s,   RoutedEventArgs e) => WindowState = WindowState.Minimized;
     void CloseBtn_Click(object s, RoutedEventArgs e) => Close();
+    void Window_Closing(object s, System.ComponentModel.CancelEventArgs e) => CleanTrash();
     void MaxBtn_Click(object s,   RoutedEventArgs e) =>
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
 
@@ -284,13 +285,13 @@ public partial class MainWindow : Window
                 $"No images found in folder {_settings.SourceFolder}\n\n" +
                 $"Make sure the session folder contains a subfolder named \"{_settings.SourceFolder}\"";
             ClearInfoBar();
+            RefreshStats();
             SetActionsEnabled(false);
             return;
         }
 
         SetActionsEnabled(true);
         ShowCurrent();
-        RefreshStats();
     }
 
     // ── Image display ─────────────────────────────────────────────────────────
@@ -317,6 +318,8 @@ public partial class MainWindow : Window
 
         if (_idx + 1 < _images.Count)
             PreloadNext(_images[_idx + 1].File.FullName);
+
+        RefreshStats();
     }
 
     void SetImage(BitmapImage? bmp)
@@ -383,7 +386,7 @@ public partial class MainWindow : Window
         var (file, folder) = _images[_idx];
 
         // Image is already in the destination - just advance
-        if (folder == target) { _idx++; ShowCurrent(); RefreshStats(); return; }
+        if (folder == target) { _idx++; ShowCurrent(); return; }
 
         var destDir = new DirectoryInfo(
             Path.Combine(_sessionDir!.FullName, target.ToString()));
@@ -405,7 +408,6 @@ public partial class MainWindow : Window
 
         _idx++;
         ShowCurrent();
-        RefreshStats();
     }
 
     // ── Undo ─────────────────────────────────────────────────────────────────
@@ -448,7 +450,6 @@ public partial class MainWindow : Window
 
         SetActionsEnabled(true);
         ShowCurrent();
-        RefreshStats();
     }
 
     // ── Delete (moves to .trash, undoable) ───────────────────────────────────
@@ -477,7 +478,6 @@ public partial class MainWindow : Window
         _deleted++;
 
         ShowCurrent();
-        RefreshStats();
     }
 
     // ── Button click forwarding ───────────────────────────────────────────────

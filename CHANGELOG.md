@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.0.4] - 2026-06-04
+
+### Fixed
+- **Trash cleaned on exit** — the `.trash` folder is now wiped automatically when the app window closes, keeping session folders tidy
+- **Stats refresh consolidation** — counters now update from a single point inside `ShowCurrent()`, eliminating potential double-refresh on certain action paths
+
+---
+
 ## [v1.0.3] - 2026-06-04
 
 ### Added

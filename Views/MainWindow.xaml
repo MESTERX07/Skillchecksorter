@@ -12,7 +12,8 @@
         DragOver="Window_DragOver"
         KeyDown="Window_KeyDown"
         StateChanged="Window_StateChanged"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="6"
