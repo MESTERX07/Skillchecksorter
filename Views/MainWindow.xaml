@@ -1,0 +1,407 @@
+<Window x:Class="SkillCheckSorter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SkillCheckSorter"
+        Height="820" Width="1100"
+        MinHeight="620" MinWidth="840"
+        Background="#080808"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver"
+        KeyDown="Window_KeyDown"
+        StateChanged="Window_StateChanged"
+        Loaded="Window_Loaded">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="6"
+                      UseAeroCaptionButtons="False" GlassFrameThickness="0"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+
+        <!-- ══ Shared dark button template ══════════════════════════════════ -->
+        <ControlTemplate x:Key="DarkBtnTpl" TargetType="Button">
+            <Border x:Name="Bd"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="1" CornerRadius="3">
+                <TextBlock Text="{TemplateBinding Content}"
+                           Foreground="{TemplateBinding Foreground}"
+                           FontWeight="{TemplateBinding FontWeight}"
+                           FontSize="{TemplateBinding FontSize}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="{TemplateBinding Padding}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.30"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- ══ Action button base ════════════════════════════════════════════ -->
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Template"    Value="{StaticResource DarkBtnTpl}"/>
+            <Setter Property="FontWeight"  Value="Bold"/>
+            <Setter Property="FontSize"    Value="14"/>
+            <Setter Property="Height"      Value="44"/>
+            <Setter Property="Cursor"      Value="Hand"/>
+            <Setter Property="Padding"     Value="16,0"/>
+        </Style>
+
+        <Style x:Key="HitBtn"    TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#0C1A0C"/>
+            <Setter Property="Foreground"  Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#1E3A1E"/>
+            <Setter Property="MinWidth"    Value="110"/>
+        </Style>
+        <Style x:Key="MissBtn"   TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#1A0C0C"/>
+            <Setter Property="Foreground"  Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#3A1E1E"/>
+            <Setter Property="MinWidth"    Value="110"/>
+        </Style>
+        <Style x:Key="UnsureBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#181400"/>
+            <Setter Property="Foreground"  Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#362C00"/>
+            <Setter Property="MinWidth"    Value="110"/>
+        </Style>
+        <Style x:Key="UndoBtn"   TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#141414"/>
+            <Setter Property="Foreground"  Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#252525"/>
+            <Setter Property="MinWidth"    Value="90"/>
+        </Style>
+        <Style x:Key="DelBtn"    TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#0F0F0F"/>
+            <Setter Property="Foreground"  Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#1C1C1C"/>
+            <Setter Property="MinWidth"    Value="90"/>
+        </Style>
+        <Style x:Key="OpenBtn" TargetType="Button">
+            <Setter Property="Template"    Value="{StaticResource DarkBtnTpl}"/>
+            <Setter Property="Background"  Value="#141414"/>
+            <Setter Property="Foreground"  Value="#C0C0C0"/>
+            <Setter Property="BorderBrush" Value="#2A2A2A"/>
+            <Setter Property="FontSize"    Value="12"/>
+            <Setter Property="Height"      Value="30"/>
+            <Setter Property="Cursor"      Value="Hand"/>
+            <Setter Property="Padding"     Value="12,0"/>
+        </Style>
+        <Style x:Key="IconBtn" TargetType="Button">
+            <Setter Property="Template"    Value="{StaticResource DarkBtnTpl}"/>
+            <Setter Property="Background"  Value="Transparent"/>
+            <Setter Property="Foreground"  Value="#909090"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Cursor"      Value="Hand"/>
+            <Setter Property="Padding"     Value="0"/>
+        </Style>
+        <Style x:Key="CaptionBtn" TargetType="Button" BasedOn="{StaticResource IconBtn}">
+            <Setter Property="Width"    Value="40"/>
+            <Setter Property="Height"   Value="52"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+        </Style>
+
+        <!-- ══ Progress bar ══════════════════════════════════════════════════ -->
+        <Style x:Key="MonoBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="3"/>
+            <Setter Property="Maximum" Value="1000"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border Background="#1A1A1A" CornerRadius="1" Height="3">
+                            <Border x:Name="PART_Track" Background="Transparent">
+                                <Border x:Name="PART_Indicator"
+                                        HorizontalAlignment="Left"
+                                        Background="#FFFFFF"
+                                        CornerRadius="1"/>
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ══ ComboBox - FIXED: ToggleButton has a real ControlTemplate ════ -->
+        <!--   Template="{x:Null}" has no hit-test area; the Border below does. -->
+        <Style x:Key="DarkCombo" TargetType="ComboBox">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Foreground"  Value="#C8C8C8"/>
+            <Setter Property="Background"  Value="#0F0F0F"/>
+            <Setter Property="BorderBrush" Value="#2A2A2A"/>
+            <Setter Property="Height"      Value="26"/>
+            <Setter Property="MinWidth"    Value="74"/>
+            <Setter Property="FontSize"    Value="12"/>
+            <Setter Property="Cursor"      Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <!-- ToggleButton must have its OWN template with a real Border
+                                 so WPF can hit-test it. Template=null gives zero hit area. -->
+                            <ToggleButton x:Name="Tgl"
+                                          Focusable="False" ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                                      RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="TglBd"
+                                                Background="{Binding Background,
+                                                             RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                BorderBrush="{Binding BorderBrush,
+                                                             RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                BorderThickness="1" CornerRadius="3">
+                                            <!-- chevron -->
+                                            <Path HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,0,7,0"
+                                                  Fill="#909090"
+                                                  Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="TglBd" Property="BorderBrush" Value="#666666"/>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="TglBd" Property="BorderBrush" Value="#888888"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+
+                            <!-- Selected item text (behind the toggle, IsHitTestVisible=False) -->
+                            <ContentPresenter x:Name="Content"
+                                              IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              VerticalAlignment="Center"
+                                              Margin="8,0,22,0"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+
+                            <!-- Dropdown popup -->
+                            <Popup x:Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border Background="#141414"
+                                        BorderBrush="#2A2A2A" BorderThickness="1"
+                                        MaxHeight="200"
+                                        MinWidth="{TemplateBinding ActualWidth}">
+                                    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboItem}"/>
+        </Style>
+
+    </Window.Resources>
+
+    <DockPanel>
+
+        <!-- ══ Top bar ═══════════════════════════════════════════════════════ -->
+        <Border x:Name="TopBar" DockPanel.Dock="Top" Height="52"
+                Background="#000000"
+                BorderBrush="#1C1C1C" BorderThickness="0,0,0,1"
+                MouseLeftButtonDown="TopBar_MouseDown">
+            <Grid>
+                <!-- Logo + title -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
+                    <!-- Vector logo: skill-check circle with needle -->
+                    <Viewbox Width="22" Height="22" Margin="0,0,10,0">
+                        <Canvas Width="24" Height="24">
+                            <Ellipse Width="22" Height="22" Canvas.Left="1" Canvas.Top="1"
+                                     Stroke="#FFFFFF" StrokeThickness="2" Fill="Transparent"/>
+                            <Line X1="12" Y1="12" X2="21" Y2="6"
+                                  Stroke="#FFFFFF" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            <Ellipse Width="4" Height="4"
+                                     Canvas.Left="10" Canvas.Top="10" Fill="#FFFFFF"/>
+                        </Canvas>
+                    </Viewbox>
+                    <TextBlock Text="SkillCheckSorter"
+                               FontSize="15" FontWeight="Bold" Foreground="#F0F0F0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Caption buttons -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="GearBtn" Style="{StaticResource IconBtn}"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Width="32" Height="32" FontSize="16" Margin="0,0,4,0"
+                            Content="⚙" Click="GearBtn_Click"/>
+                    <Button x:Name="MinBtn"   Style="{StaticResource CaptionBtn}"
+                            Content="-"  Click="MinBtn_Click"/>
+                    <Button x:Name="MaxBtn"   Style="{StaticResource CaptionBtn}"
+                            Content="□"  Click="MaxBtn_Click"/>
+                    <Button x:Name="CloseBtn" Style="{StaticResource CaptionBtn}"
+                            Content="✕"  Click="CloseBtn_Click" Margin="0,0,2,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ══ Config bar - source / HIT / MISS inline selectors ═════════════ -->
+        <Border DockPanel.Dock="Top" Height="42"
+                Background="#0A0A0A"
+                BorderBrush="#181818" BorderThickness="0,0,0,1">
+            <Grid Margin="14,0">
+
+                <!-- Configured: show combos -->
+                <StackPanel x:Name="CfgBar" Orientation="Horizontal"
+                            VerticalAlignment="Center" Visibility="Collapsed">
+                    <TextBlock Text="Sort from"
+                               FontSize="11" Foreground="#909090"
+                               VerticalAlignment="Center"/>
+                    <ComboBox x:Name="SourceCombo" Style="{StaticResource DarkCombo}"
+                              Margin="8,0,0,0"
+                              SelectionChanged="SourceCombo_Changed"/>
+
+                    <Rectangle Width="1" Height="16" Fill="#1E1E1E" Margin="14,0"/>
+
+                    <TextBlock Text="HIT →"
+                               FontSize="11" Foreground="#909090"
+                               VerticalAlignment="Center"/>
+                    <ComboBox x:Name="HitCombo" Style="{StaticResource DarkCombo}"
+                              Margin="8,0,0,0"
+                              SelectionChanged="HitCombo_Changed"/>
+
+                    <Rectangle Width="1" Height="16" Fill="#1E1E1E" Margin="14,0"/>
+
+                    <TextBlock Text="MISS →"
+                               FontSize="11" Foreground="#909090"
+                               VerticalAlignment="Center"/>
+                    <ComboBox x:Name="MissCombo" Style="{StaticResource DarkCombo}"
+                              Margin="8,0,0,0"
+                              SelectionChanged="MissCombo_Changed"/>
+
+                    <TextBlock x:Name="CfgConflict"
+                               Text="  ⚠  HIT and MISS must be different"
+                               FontSize="11" Foreground="#E05555"
+                               VerticalAlignment="Center"
+                               Visibility="Collapsed"/>
+                </StackPanel>
+
+                <!-- Not configured -->
+                <TextBlock x:Name="CfgPrompt"
+                           Text="Not configured - click ⚙ in the top bar to run setup"
+                           FontSize="11" Foreground="#777777"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ══ Folder picker ═════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Height="44"
+                Background="#0D0D0D"
+                BorderBrush="#181818" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0">
+                <Button x:Name="OpenBtn" Style="{StaticResource OpenBtn}"
+                        Content="Open Session Folder" Click="OpenBtn_Click"/>
+                <TextBlock x:Name="FolderLabel"
+                           Margin="10,0,0,0" FontSize="11" Foreground="#FFFFFF"
+                           VerticalAlignment="Center"
+                           Text="No folder open - select one or drag &amp; drop here"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ══ Stats bar (bottom) ═════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom" Height="34"
+                Background="#000000"
+                BorderBrush="#141414" BorderThickness="0,1,0,0">
+            <Grid Margin="14,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="RemLabel"
+                               FontSize="12" Foreground="#A0A0A0" Text="Left to sort:"/>
+                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                    <TextBlock x:Name="HitLabel"
+                               FontSize="12" FontWeight="Bold" Foreground="#5ABF5A" Text="HIT:"/>
+                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                    <TextBlock x:Name="MissLabel"
+                               FontSize="12" FontWeight="Bold" Foreground="#E05555" Text="MISS:"/>
+                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                    <TextBlock x:Name="UnsureLabel"
+                               FontSize="12" FontWeight="Bold" Foreground="#B8960C" Text="UNSURE:"/>
+                    <TextBlock Margin="12,0" FontSize="12" Foreground="#444444" Text="|"/>
+                    <TextBlock x:Name="DelLabel"
+                               FontSize="12" FontWeight="Bold" Foreground="#888888" Text="DEL:"/>
+                </StackPanel>
+                <ProgressBar x:Name="ProgressBar" Style="{StaticResource MonoBar}"
+                             HorizontalAlignment="Right" Width="220"
+                             VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ══ Action bar (bottom) ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom" Height="66"
+                Background="#0A0A0A"
+                BorderBrush="#181818" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                <Button x:Name="HitBtn"    Style="{StaticResource HitBtn}"    Click="HitBtn_Click"
+                        Content="✓  HIT"/>
+                <TextBlock Text="H/→" Foreground="#606060" FontSize="10"
+                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+
+                <Button x:Name="MissBtn"   Style="{StaticResource MissBtn}"   Click="MissBtn_Click"
+                        Content="✗  MISS"/>
+                <TextBlock Text="M/←" Foreground="#606060" FontSize="10"
+                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+
+                <Button x:Name="UnsureBtn" Style="{StaticResource UnsureBtn}" Click="UnsureBtn_Click"
+                        Content="?  Unsure"/>
+                <TextBlock Text="U"   Foreground="#606060" FontSize="10"
+                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+
+                <Button x:Name="UndoBtn"   Style="{StaticResource UndoBtn}"   Click="UndoBtn_Click"
+                        Content="↩  Undo"/>
+                <TextBlock Text="Ctrl+Z" Foreground="#606060" FontSize="10"
+                           VerticalAlignment="Center" Margin="4,0,14,0"/>
+
+                <Button x:Name="DelBtn"    Style="{StaticResource DelBtn}"    Click="DelBtn_Click"
+                        Content="⌫  Delete"/>
+                <TextBlock Text="Del" Foreground="#606060" FontSize="10"
+                           VerticalAlignment="Center" Margin="4,0,0,0"/>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ══ Info bar (bottom) ══════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom" Height="27"
+                Background="#090909"
+                BorderBrush="#141414" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0">
+                <TextBlock x:Name="NameLabel"      FontSize="11" Foreground="#C0C0C0"/>
+                <TextBlock Margin="8,0"            FontSize="11" Foreground="#555555" Text="·"/>
+                <TextBlock x:Name="FolderNumLabel" FontSize="11" FontWeight="Bold" Foreground="#A0A0A0"/>
+                <TextBlock Margin="8,0"            FontSize="11" Foreground="#555555" Text="·"/>
+                <TextBlock x:Name="CounterLabel"   FontSize="11" Foreground="#A0A0A0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ══ Image canvas (fills remaining height) ═════════════════════════ -->
+        <Grid Background="#060606">
+            <Image x:Name="MainImage"
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   SnapsToDevicePixels="True"/>
+            <TextBlock x:Name="PlaceholderText"
+                       Foreground="#555555" FontSize="14"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="Open a session folder to begin"
+                       TextAlignment="Center" TextWrapping="Wrap"
+                       MaxWidth="400"/>
+        </Grid>
+
+    </DockPanel>
+</Window>

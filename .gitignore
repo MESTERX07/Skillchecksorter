@@ -1,0 +1,19 @@
+## .NET build artifacts
+bin/
+obj/
+publish/
+
+## User-specific settings (contains local folder paths)
+settings.json
+
+## Rider / VS / VSCode
+.idea/
+.vs/
+*.user
+*.suo
+.vscode/
+
+## Temporary files
+*.tmp
+*.bak
+.trash/

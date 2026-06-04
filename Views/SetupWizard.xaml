@@ -1,0 +1,258 @@
+<Window x:Class="SkillCheckSorter.SetupWizard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Setup - SkillCheckSorter"
+        Width="520" Height="420"
+        Background="#080808"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        MouseLeftButtonDown="Window_MouseDown">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+
+        <!-- Same fixed ComboBox template as MainWindow -->
+        <Style x:Key="WizCombo" TargetType="ComboBox">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Foreground"  Value="#C8C8C8"/>
+            <Setter Property="Background"  Value="#0F0F0F"/>
+            <Setter Property="BorderBrush" Value="#2A2A2A"/>
+            <Setter Property="Height"      Value="36"/>
+            <Setter Property="Width"       Value="110"/>
+            <Setter Property="FontSize"    Value="14"/>
+            <Setter Property="Cursor"      Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Focusable="False" ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                                      RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="TglBd"
+                                                Background="{Binding Background,
+                                                             RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                BorderBrush="{Binding BorderBrush,
+                                                             RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                BorderThickness="1" CornerRadius="3">
+                                            <Path HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,0,10,0"
+                                                  Fill="#909090"
+                                                  Data="M 0 0 L 5 5 L 10 0 Z"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="TglBd" Property="BorderBrush" Value="#666666"/>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="TglBd" Property="BorderBrush" Value="#888888"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              VerticalAlignment="Center"
+                                              Margin="12,0,28,0"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+                            <Popup Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border Background="#111111" BorderBrush="#2A2A2A" BorderThickness="1"
+                                        MaxHeight="220" MinWidth="{TemplateBinding ActualWidth}">
+                                    <ScrollViewer VerticalScrollBarVisibility="Hidden"><ItemsPresenter/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboItem}"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Border BorderBrush="#1E1E1E" BorderThickness="1" CornerRadius="4">
+        <Grid Background="#080808">
+
+            <!-- Top white bar (branding accent) -->
+            <Border Height="2" VerticalAlignment="Top" Background="#FFFFFF"
+                    CornerRadius="3,3,0,0"/>
+
+            <!-- Close button -->
+            <Button VerticalAlignment="Top" HorizontalAlignment="Right"
+                    Margin="0,10,12,0" Width="24" Height="24"
+                    FontSize="12" Cursor="Hand"
+                    Foreground="#909090" Background="Transparent" BorderBrush="Transparent"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="CloseBtn_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#3A1010"/>
+                                <Setter Property="Foreground" Value="#FF6060"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+                <TextBlock Text="✕"/>
+            </Button>
+
+            <!-- ══ Page 0: Welcome ════════════════════════════════════════════ -->
+            <Grid x:Name="Page0" Margin="52,30,52,30">
+                <StackPanel VerticalAlignment="Center">
+
+                    <!-- Logo -->
+                    <Viewbox Width="40" Height="40" HorizontalAlignment="Center" Margin="0,0,0,20">
+                        <Canvas Width="24" Height="24">
+                            <Ellipse Width="22" Height="22" Canvas.Left="1" Canvas.Top="1"
+                                     Stroke="#FFFFFF" StrokeThickness="2" Fill="Transparent"/>
+                            <Line X1="12" Y1="12" X2="21" Y2="6"
+                                  Stroke="#FFFFFF" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            <Ellipse Width="4" Height="4"
+                                     Canvas.Left="10" Canvas.Top="10" Fill="#FFFFFF"/>
+                        </Canvas>
+                    </Viewbox>
+
+                    <TextBlock Text="SkillCheckSorter"
+                               FontSize="22" FontWeight="Bold" Foreground="#F0F0F0"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Dead by Daylight - AI Training Data Sorter"
+                               FontSize="12" Foreground="#888888"
+                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+
+                    <Border Height="1" Background="#1A1A1A" Margin="0,28,0,28"/>
+
+                    <TextBlock HorizontalAlignment="Center" FontSize="13" Foreground="#A0A0A0"
+                               TextWrapping="Wrap" LineHeight="20" TextAlignment="Center">
+                        This wizard takes 30 seconds.&#10;Configure which folder to sort and where results go.
+                    </TextBlock>
+
+                    <Button x:Name="GetStartedBtn"
+                            Content="Get Started  →"
+                            Margin="0,32,0,0" Height="40" Width="180"
+                            HorizontalAlignment="Center"
+                            FontSize="13" FontWeight="Bold" Cursor="Hand"
+                            Background="#FFFFFF" Foreground="#000000"
+                            BorderBrush="#FFFFFF"
+                            Template="{StaticResource FlatBtn}"
+                            Click="Next_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ══ Pages 1-3: data pages ════════════════════════════════════ -->
+            <Grid x:Name="DataPages" Visibility="Collapsed" Margin="52,22,52,22">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Step dots -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal"
+                            HorizontalAlignment="Center" Margin="0,6,0,0">
+                    <Ellipse x:Name="Dot1" Width="8" Height="8" Fill="#FFFFFF"/>
+                    <Rectangle Width="32" Height="1" Fill="#555555"
+                               VerticalAlignment="Center" Margin="6,0"/>
+                    <Ellipse x:Name="Dot2" Width="8" Height="8" Fill="#555555"/>
+                    <Rectangle Width="32" Height="1" Fill="#555555"
+                               VerticalAlignment="Center" Margin="6,0"/>
+                    <Ellipse x:Name="Dot3" Width="8" Height="8" Fill="#555555"/>
+                </StackPanel>
+
+                <!-- Page content -->
+                <Grid Grid.Row="1" VerticalAlignment="Center">
+
+                    <StackPanel x:Name="Page1">
+                        <TextBlock Text="Step 1 of 3"
+                                   FontSize="11" Foreground="#A0A0A0" Margin="0,0,0,10"/>
+                        <TextBlock Text="Which folder do you want to sort?"
+                                   FontSize="18" FontWeight="Bold" Foreground="#E8E8E8"/>
+                        <TextBlock FontSize="12" Foreground="#888888"
+                                   TextWrapping="Wrap" Margin="0,8,0,24" LineHeight="18">
+                            Choose the subfolder number (0-9) that contains images to review.
+                            Only this folder will be shown.
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Sort images from:"
+                                       FontSize="13" Foreground="#888888"
+                                       VerticalAlignment="Center" Width="165"/>
+                            <ComboBox x:Name="SourceCombo" Style="{StaticResource WizCombo}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Page2" Visibility="Collapsed">
+                        <TextBlock Text="Step 2 of 3"
+                                   FontSize="11" Foreground="#A0A0A0" Margin="0,0,0,10"/>
+                        <TextBlock Text="Where should HIT images go?"
+                                   FontSize="18" FontWeight="Bold" Foreground="#E8E8E8"/>
+                        <TextBlock FontSize="12" Foreground="#888888"
+                                   TextWrapping="Wrap" Margin="0,8,0,24" LineHeight="18">
+                            When you press HIT, the image moves to this folder.
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Move HIT images to:"
+                                       FontSize="13" Foreground="#888888"
+                                       VerticalAlignment="Center" Width="165"/>
+                            <ComboBox x:Name="HitCombo" Style="{StaticResource WizCombo}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Page3" Visibility="Collapsed">
+                        <TextBlock Text="Step 3 of 3"
+                                   FontSize="11" Foreground="#A0A0A0" Margin="0,0,0,10"/>
+                        <TextBlock Text="Where should MISS images go?"
+                                   FontSize="18" FontWeight="Bold" Foreground="#E8E8E8"/>
+                        <TextBlock FontSize="12" Foreground="#888888"
+                                   TextWrapping="Wrap" Margin="0,8,0,24" LineHeight="18">
+                            When you press MISS, the image moves to this folder.
+                            Must be different from HIT.
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Move MISS images to:"
+                                       FontSize="13" Foreground="#888888"
+                                       VerticalAlignment="Center" Width="165"/>
+                            <ComboBox x:Name="MissCombo" Style="{StaticResource WizCombo}"/>
+                        </StackPanel>
+                        <TextBlock x:Name="ConflictWarn"
+                                   Text="⚠  HIT and MISS folders must be different"
+                                   Foreground="#E05555" FontSize="11"
+                                   Margin="0,12,0,0" Visibility="Collapsed"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Nav buttons -->
+                <Grid Grid.Row="2" Margin="0,0,0,2">
+                    <Button x:Name="BackBtn" HorizontalAlignment="Left"
+                            Height="36" Width="90" FontSize="12" Cursor="Hand"
+                            Content="← Back"
+                            Background="#141414" Foreground="#A0A0A0" BorderBrush="#252525"
+                            Template="{StaticResource FlatBtn}"
+                            Click="Back_Click"/>
+                    <Button x:Name="NextBtn" HorizontalAlignment="Right"
+                            Height="36" Width="110" FontSize="12" FontWeight="Bold" Cursor="Hand"
+                            Content="Next →"
+                            Background="#FFFFFF" Foreground="#000000" BorderBrush="#FFFFFF"
+                            Template="{StaticResource FlatBtn}"
+                            Click="Next_Click"/>
+                </Grid>
+            </Grid>
+
+        </Grid>
+    </Border>
+</Window>
